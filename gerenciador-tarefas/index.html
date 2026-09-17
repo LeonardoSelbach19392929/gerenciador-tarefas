@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gerenciador de Tarefas</title>
+    <meta name="description" content="Aplicação web para gerenciar tarefas com localStorage." />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/script.js" defer></script>
+</head>
+<body>
+<div class="app">
+
+    <!-- CABEÇALHO -->
+    <header class="app-header">
+        <h1>Gerenciador de <span>Tarefas</span></h1>
+        <button type="button" id="btn-tema">🌙 Modo escuro</button>
+    </header>
+
+    <!-- INDICADORES -->
+    <section class="indicadores" aria-label="Resumo das tarefas">
+        <div class="indicador total">
+            <span class="num" id="ind-total">0</span>
+            <span class="label">Total</span>
+        </div>
+        <div class="indicador pendentes">
+            <span class="num" id="ind-pendentes">0</span>
+            <span class="label">Pendentes</span>
+        </div>
+        <div class="indicador concluidas">
+            <span class="num" id="ind-concluidas">0</span>
+            <span class="label">Concluídas</span>
+        </div>
+    </section>
+
+    <!-- FORMULÁRIO -->
+    <section class="card" aria-labelledby="titulo-form">
+        <h2 id="titulo-form">Nova tarefa</h2>
+
+        <div class="erro-validacao" id="erro-msg" role="alert" aria-live="polite"></div>
+
+        <div class="form-grid">
+            <div class="form-group full">
+                <label for="input-descricao">Descrição</label>
+                <input type="text" id="input-descricao" placeholder="O que precisa ser feito?" maxlength="200" />
+            </div>
+
+            <div class="form-group">
+                <label for="input-categoria">Categoria</label>
+                <select id="input-categoria">
+                    <option value="">Selecione…</option>
+                    <option value="Estudos">Estudos</option>
+                    <option value="Trabalho">Trabalho</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Casa">Casa</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Finanças">Finanças</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="input-prioridade">Prioridade</label>
+                <select id="input-prioridade">
+                    <option value="">Selecione…</option>
+                    <option value="baixa">Baixa</option>
+                    <option value="media">Média</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="input-data">Data de conclusão</label>
+                <input type="date" id="input-data" />
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="btn-adicionar">
+                    ＋ Adicionar tarefa
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FILTROS -->
+    <section class="card" aria-labelledby="titulo-filtros">
+        <h2 id="titulo-filtros">Filtros</h2>
+        <div class="filtros-grid">
+            <div class="form-group">
+                <label for="filtro-situacao">Situação</label>
+                <select id="filtro-situacao">
+                    <option value="todas">Todas</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="concluidas">Concluídas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filtro-categoria">Categoria</label>
+                <select id="filtro-categoria">
+                    <option value="todas">Todas</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- LISTA DE TAREFAS -->
+    <section class="card" aria-labelledby="titulo-lista">
+        <h2 id="titulo-lista">Tarefas</h2>
+        <div id="lista-tarefas"></div>
+    </section>
+
+</div>
+</body>
+</html>
