@@ -1,53 +1,24 @@
-/**
- * Gerenciador de Tarefas
- * Curso de Desenvolvimento Front-end – Bolsa Futuro Digital / IFSUL
- *
- * Funcionalidades:
- *  - Cadastro de tarefas (descrição, categoria, prioridade, data)
- *  - Listagem dinâmica no DOM
- *  - Concluir / desfazer conclusão
- *  - Exclusão com confirmação
- *  - Filtros por situação e categoria
- *  - Indicadores (total, pendentes, concluídas)
- *  - Persistência via localStorage
- *  - Modo escuro persistido
- */
-
-// ============================================================
-// 1. ESTADO DA APLICAÇÃO
-// ============================================================
-
-/** @type {Array<{id:string, descricao:string, categoria:string, prioridade:string, data:string, concluida:boolean}>} */
 let tarefas = [];
 
-// ============================================================
-// 2. ARMAZENAMENTO (localStorage)
-// ============================================================
-
-/**
- * Salva o array de tarefas no localStorage como JSON.
- */
 function salvarDados() {
-    localStorage.setItem('tarefas', JSON.stringify(tarefas));
+    try {
+        localStorage.setItem('tarefas', JSON.stringify(tarefas));
+    } catch (error) {
+        console.error('Erro ao salvar dados:', error);
+        alert("Não foi possível salvar os dados!!")
+    }
 }
 
-/**
- * Lê as tarefas do localStorage e inicializa o array.
- * Se não houver dados, inicia com array vazio.
- */
 function carregarDados() {
-    const dados = localStorage.getItem('tarefas');
+    try {
+        const dados = localStorage.getItem('tarefas');
     tarefas = dados ? JSON.parse(dados) : [];
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        alert("Não foi possível carregar os dados!!");
+    }
 }
 
-// ============================================================
-// 3. TEMA (modo escuro)
-// ============================================================
-
-/**
- * Aplica ou remove o modo escuro e atualiza o botão.
- * O estado é salvo no localStorage.
- */
 function aplicarTema(modoEscuro) {
     const btn = document.getElementById('btn-tema');
     if (modoEscuro) {
@@ -67,47 +38,28 @@ function alternarTema() {
 }
 
 function carregarTema() {
-    // Padrão: modo escuro ligado (igual ao projeto anterior do aluno)
     const salvo = localStorage.getItem('modoEscuro');
     const modoEscuro = salvo === null ? true : salvo === '1';
     if (salvo === null) localStorage.setItem('modoEscuro', '1');
     aplicarTema(modoEscuro);
 }
 
-// ============================================================
-// 4. INDICADORES
-// ============================================================
-
-/**
- * Atualiza os contadores de total, pendentes e concluídas
- * com base no array atual de tarefas (sem filtro).
- */
 function atualizarIndicadores() {
-    const total     = tarefas.length;
+    const total      = tarefas.length;
     const concluidas = tarefas.filter(t => t.concluida).length;
     const pendentes  = total - concluidas;
 
-    document.getElementById('ind-total').textContent     = total;
+    document.getElementById('ind-total').textContent      = total;
     document.getElementById('ind-pendentes').textContent  = pendentes;
     document.getElementById('ind-concluidas').textContent = concluidas;
 }
 
-// ============================================================
-// 5. FILTROS DE CATEGORIA
-// ============================================================
-
-/**
- * Reconstrói as opções do <select> de categoria
- * com base nas categorias presentes nas tarefas salvas.
- */
 function atualizarFiltroCategoria() {
     const select = document.getElementById('filtro-categoria');
     const valorAtual = select.value;
 
-    // Obtém categorias únicas
     const categorias = [...new Set(tarefas.map(t => t.categoria))].sort();
 
-    // Limpa e reconstrói
     select.innerHTML = '<option value="todas">Todas</option>';
     categorias.forEach(cat => {
         const opt = document.createElement('option');
@@ -116,16 +68,11 @@ function atualizarFiltroCategoria() {
         select.appendChild(opt);
     });
 
-    // Tenta manter o filtro anterior
     if (categorias.includes(valorAtual)) {
         select.value = valorAtual;
     }
 }
 
-/**
- * Retorna as tarefas filtradas conforme os selects de situação e categoria.
- * Os filtros NÃO alteram os dados originais.
- */
 function tarefasFiltradas() {
     const situacao  = document.getElementById('filtro-situacao').value;
     const categoria = document.getElementById('filtro-categoria').value;
@@ -134,7 +81,7 @@ function tarefasFiltradas() {
         const passaSituacao =
             situacao === 'todas'     ? true :
             situacao === 'pendentes' ? !t.concluida :
-                                      t.concluida;
+                                       t.concluida;
 
         const passaCategoria = categoria === 'todas' || t.categoria === categoria;
 
@@ -142,35 +89,16 @@ function tarefasFiltradas() {
     });
 }
 
-// ============================================================
-// 6. RENDERIZAÇÃO DA LISTA
-// ============================================================
-
-/**
- * Formata uma data 'YYYY-MM-DD' para 'DD/MM/AAAA'.
- * @param {string} dataISO
- * @returns {string}
- */
 function formatarData(dataISO) {
     if (!dataISO) return '—';
     const [ano, mes, dia] = dataISO.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
-/**
- * Retorna o texto legível de uma prioridade.
- * @param {string} prioridade
- * @returns {string}
- */
 function textoPrioridade(prioridade) {
     return { baixa: 'Baixa', media: 'Média', alta: 'Alta' }[prioridade] || prioridade;
 }
 
-/**
- * Cria e retorna o elemento DOM de uma tarefa.
- * @param {{id:string, descricao:string, categoria:string, prioridade:string, data:string, concluida:boolean}} tarefa
- * @returns {HTMLElement}
- */
 function criarElementoTarefa(tarefa) {
     const item = document.createElement('div');
     item.classList.add('tarefa-item');
@@ -178,15 +106,12 @@ function criarElementoTarefa(tarefa) {
     item.dataset.prioridade = tarefa.prioridade;
     if (tarefa.concluida) item.classList.add('concluida');
 
-    // Badge de prioridade
     const classeBadgePrio = `badge badge-${tarefa.prioridade}`;
 
-    // Badge de situação (só aparece se concluída)
     const badgeSituacao = tarefa.concluida
         ? '<span class="badge badge-concluida">✔ Concluída</span>'
         : '';
 
-    // Botão de concluir ou desfazer
     const btnAcao = tarefa.concluida
         ? `<button class="btn btn-sm btn-desfazer" data-acao="desfazer" data-id="${tarefa.id}">↩ Desfazer</button>`
         : `<button class="btn btn-sm btn-concluir" data-acao="concluir" data-id="${tarefa.id}">✔ Concluir</button>`;
@@ -210,10 +135,6 @@ function criarElementoTarefa(tarefa) {
     return item;
 }
 
-/**
- * Renderiza a lista de tarefas filtradas no DOM.
- * Exibe mensagem se não houver tarefas.
- */
 function renderizarTarefas() {
     const container = document.getElementById('lista-tarefas');
     container.innerHTML = '';
@@ -221,7 +142,6 @@ function renderizarTarefas() {
     const lista = tarefasFiltradas();
 
     if (lista.length === 0) {
-        // Mensagem diferente dependendo se há tarefas cadastradas ou só filtradas
         if (tarefas.length === 0) {
             container.innerHTML = `
                 <div class="lista-vazia">
@@ -245,15 +165,6 @@ function renderizarTarefas() {
     });
 }
 
-// ============================================================
-// 7. VALIDAÇÃO DO FORMULÁRIO
-// ============================================================
-
-/**
- * Valida os campos do formulário.
- * Exibe mensagem de erro e retorna false se inválido.
- * @returns {boolean}
- */
 function validarFormulario() {
     const descricao  = document.getElementById('input-descricao').value.trim();
     const categoria  = document.getElementById('input-categoria').value;
@@ -279,22 +190,10 @@ function validarFormulario() {
     return true;
 }
 
-// ============================================================
-// 8. OPERAÇÕES DE TAREFA
-// ============================================================
-
-/**
- * Gera um ID único simples baseado em timestamp + random.
- * @returns {string}
- */
 function gerarId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-/**
- * Lê os dados do formulário, valida e adiciona a nova tarefa.
- * A tarefa inicia sempre como pendente.
- */
 function adicionarTarefa() {
     if (!validarFormulario()) return;
 
@@ -304,7 +203,7 @@ function adicionarTarefa() {
         categoria:  document.getElementById('input-categoria').value,
         prioridade: document.getElementById('input-prioridade').value,
         data:       document.getElementById('input-data').value,
-        concluida:  false   // nova tarefa sempre começa como pendente
+        concluida:  false
     };
 
     tarefas.push(novaTarefa);
@@ -315,11 +214,6 @@ function adicionarTarefa() {
     renderizarTarefas();
 }
 
-/**
- * Altera o estado de conclusão de uma tarefa e persiste.
- * @param {string} id
- * @param {boolean} concluida
- */
 function alterarEstadoTarefa(id, concluida) {
     const tarefa = tarefas.find(t => t.id === id);
     if (!tarefa) return;
@@ -330,10 +224,6 @@ function alterarEstadoTarefa(id, concluida) {
     renderizarTarefas();
 }
 
-/**
- * Remove uma tarefa do array após confirmação do usuário.
- * @param {string} id
- */
 function excluirTarefa(id) {
     const tarefa = tarefas.find(t => t.id === id);
     if (!tarefa) return;
@@ -350,15 +240,6 @@ function excluirTarefa(id) {
     renderizarTarefas();
 }
 
-// ============================================================
-// 9. UTILITÁRIOS
-// ============================================================
-
-/**
- * Escapa caracteres HTML para evitar XSS ao inserir texto no DOM.
- * @param {string} str
- * @returns {string}
- */
 function escaparHTML(str) {
     return str
         .replace(/&/g, '&amp;')
@@ -367,9 +248,6 @@ function escaparHTML(str) {
         .replace(/"/g, '&quot;');
 }
 
-/**
- * Limpa os campos do formulário após cadastro bem-sucedido.
- */
 function limparFormulario() {
     document.getElementById('input-descricao').value  = '';
     document.getElementById('input-categoria').value  = '';
@@ -377,31 +255,18 @@ function limparFormulario() {
     document.getElementById('input-data').value       = '';
 }
 
-// ============================================================
-// 10. EVENTOS
-// ============================================================
-
-/**
- * Configura todos os event listeners da aplicação.
- */
 function configurarEventos() {
-    // Botão de adicionar tarefa
     document.getElementById('btn-adicionar').addEventListener('click', adicionarTarefa);
 
-    // Permite pressionar Enter no campo de descrição para adicionar
     document.getElementById('input-descricao').addEventListener('keydown', e => {
         if (e.key === 'Enter') adicionarTarefa();
     });
 
-    // Filtros – atualizam a lista dinamicamente sem alterar os dados
     document.getElementById('filtro-situacao').addEventListener('change', renderizarTarefas);
     document.getElementById('filtro-categoria').addEventListener('change', renderizarTarefas);
 
-    // Botão de alternar tema
     document.getElementById('btn-tema').addEventListener('click', alternarTema);
 
-    // Delegação de eventos para concluir / desfazer / excluir tarefas
-    // Usa delegação para não precisar re-adicionar listeners a cada renderização
     document.getElementById('lista-tarefas').addEventListener('click', e => {
         const btn = e.target.closest('button[data-acao]');
         if (!btn) return;
@@ -415,13 +280,6 @@ function configurarEventos() {
     });
 }
 
-// ============================================================
-// 11. INICIALIZAÇÃO
-// ============================================================
-
-/**
- * Ponto de entrada: carrega dados, aplica tema e renderiza a interface.
- */
 function iniciar() {
     carregarDados();
     carregarTema();
